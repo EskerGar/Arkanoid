@@ -11,6 +11,7 @@ public class InputController : MonoBehaviour
     private Ball _ball;
     private Platform _platform;
     private Camera _cam;
+    private bool _isBallStay = true;
     [SerializeField] private PlayerGeneration playerGeneration;
 
     private void Awake()
@@ -31,9 +32,18 @@ public class InputController : MonoBehaviour
             SetPlatformPos(LeftBorder);
         else if (_platform.transform.position.x > RightBorder)
             SetPlatformPos(RightBorder);
+        if (Input.GetMouseButtonDown(0))
+            _isBallStay = false;
+        if(!_isBallStay)
+            _ball.transform.position += new Vector3(0, 1);
     }
 
-    private void SetPlatformPos(float xPos) => _platform.transform.position = new Vector3(xPos, _platform.transform.position.y);
+    private void SetPlatformPos(float xPos)
+    {
+        _platform.transform.position = new Vector3(xPos, _platform.transform.position.y);
+        if(_isBallStay)
+            _ball.transform.position = new Vector3(xPos, _ball.transform.position.y);
+    }
 
     private Vector3 GetMousePos()
     {
