@@ -1,22 +1,25 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using Ball;
 using UnityEngine;
+using static Ball.BallPool;
 
 public class PlayerGeneration : MonoBehaviour
 {
     [SerializeField] private GameObject platformPrefab;
     [SerializeField] private GameObject ballPrefab;
 
-    public event Action<Platform> OnCreatePlatform;
-    public event Action<Ball> OnCreateBall; 
+    public static List<BallBehaviour> Balls { get; } = new List<BallBehaviour>();
     
-    void Start()
+    public event Action<Platform.Platform> OnCreatePlatform;
+    public event Action<BallBehaviour> OnCreateBall;
+
+    private void Start()
     {
         var platform = CreatePlatform();
-        OnCreatePlatform?.Invoke(platform.GetComponent<Platform>());
+        OnCreatePlatform?.Invoke(platform.GetComponent<Platform.Platform>());
         var ball = BallCreate(platform);
-        OnCreateBall?.Invoke(ball.GetComponent<Ball>());
+        OnCreateBall?.Invoke(ball);
     }
 
     private GameObject CreatePlatform()
@@ -24,11 +27,16 @@ public class PlayerGeneration : MonoBehaviour
         return Instantiate(platformPrefab, transform.position, Quaternion.identity);
     }
 
-    public GameObject BallCreate(GameObject platform)
+    public BallBehaviour BallCreate(GameObject platform)
     {
         var platformTrans = platform.transform;
-        var BallPos = platformTrans.position + new Vector3(0, platformTrans.localScale.y / 2 + ballPrefab.transform.localScale.y / 2);
-        return Instantiate(ballPrefab, BallPos, Quaternion.identity);
+        var ballPos = platformTrans.position + new Vector3(0, platformTrans.localScale.y / 2 + ballPrefab.transform.localScale.y / 2);
+        var ball = Instantiate(ballPrefab, ballPos, Quaternion.identity);
+        var ballBehaviour = ball.GetComponent<BallBehaviour>();
+        ballBehaviour.Initialize(platform.GetComponent<Platform.Platform>());
+        Balls.Add(ballBehaviour);
+        AddBall();
+        return ballBehaviour;
     }
     
 }

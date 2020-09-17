@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using Ball;
 using UnityEngine;
+using static Borders;
 using Random = UnityEngine.Random;
 
 public class InputController : MonoBehaviour
 {
-    private const float LeftBorder = -8.75f;
-    private const float RightBorder = 8.75f;
-    private const float UpBorder = 4.85f;
-    private const float DownBorder = -5f;
+    [SerializeField] private PlayerGeneration playerGeneration;
     
-    private Ball _ball;
-    private Platform _platform;
+    private BallBehaviour _ball;
+    private Platform.Platform _platform;
     private Camera _cam;
     private Vector3 _firstDir;
-    [SerializeField] private PlayerGeneration playerGeneration;
 
     private void Awake()
     {
@@ -24,13 +19,12 @@ public class InputController : MonoBehaviour
         playerGeneration.OnCreateBall += GetBall;
     }
 
-    private void GetBall(Ball ball) 
+    private void GetBall(BallBehaviour ball) 
     {
         _ball = ball;
-        _ball.SetBorders(LeftBorder, RightBorder, UpBorder, DownBorder);
     }
 
-    private void GetPlatform(Platform platform) => _platform = platform;
+    private void GetPlatform(Platform.Platform platform) => _platform = platform;
 
     private void Update()
     {
@@ -39,11 +33,9 @@ public class InputController : MonoBehaviour
             SetPlatformPos(LeftBorder);
         else if (_platform.transform.position.x > RightBorder)
             SetPlatformPos(RightBorder);
-        if (Input.GetMouseButtonDown(0))
-        {
-            _ball.IsBallStay = false;
-            _ball.Dir = new Vector3(Random.Range(LeftBorder, RightBorder), 1f);
-        }
+        if (!Input.GetMouseButtonDown(0) || !_ball.IsBallStay) return;
+        _ball.IsBallStay = false;
+        _ball.Dir = new Vector3(Random.Range(LeftBorder, RightBorder), 1f);
     }
 
     private void SetPlatformPos(float xPos)
